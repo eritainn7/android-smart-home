@@ -74,11 +74,20 @@ fun AuthPage(
             modifier = Modifier.fillMaxWidth()
         )
 
-        OutlinedTextField (
-            value = "",
-            placeholder = {Text("Пароль")},
-            onValueChange = {}
-
+        OutlinedTextField(
+            value = state.password,
+            onValueChange = viewModel::onPasswordChange,
+            placeholder = { Text("Пароль") },
+            isError = state.passwordError != null,
+            supportingText = {
+                state.passwordError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            },
+            singleLine = true,
+            visualTransformation = if (state.isPasswordVisible)
+                VisualTransformation.None
+            else
+                PasswordVisualTransformation(),
+            modifier = Modifier.fillMaxWidth()
         )
 
         if (nav == "reg_page") OutlinedTextField (
