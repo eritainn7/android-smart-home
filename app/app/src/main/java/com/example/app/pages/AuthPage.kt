@@ -68,8 +68,10 @@ fun AuthPage(
         OutlinedTextField (
             value = state.email,
             placeholder = {Text("Почта")},
-            onValueChange = {}
-
+            onValueChange = viewModel::onEmailChange,
+            isError = state.emailError != null,
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
         )
 
         OutlinedTextField (
