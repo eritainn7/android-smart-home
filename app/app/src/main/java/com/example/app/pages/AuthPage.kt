@@ -90,11 +90,22 @@ fun AuthPage(
             modifier = Modifier.fillMaxWidth()
         )
 
-        if (nav == "reg_page") OutlinedTextField (
-            value = "",
-            placeholder = {Text("Повторите пароль")},
-            onValueChange = {}
-
+        if (nav == "reg_page") OutlinedTextField(
+            value = state.confirmPassword,
+            onValueChange = viewModel::onConfirmPasswordChange,
+            placeholder = { Text("Повторите пароль") },
+            isError = state.confirmPasswordError != null,
+            supportingText = {
+                state.confirmPasswordError?.let {
+                    Text(it, color = MaterialTheme.colorScheme.error)
+                }
+            },
+            singleLine = true,
+            visualTransformation = if (state.isPasswordVisible)
+                VisualTransformation.None
+            else
+                PasswordVisualTransformation(),
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(Modifier.height(8.dp))
