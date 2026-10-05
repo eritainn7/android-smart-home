@@ -66,7 +66,7 @@ fun AuthPage(
         )
 
         OutlinedTextField (
-            value = "",
+            value = state.email,
             placeholder = {Text("Почта")},
             onValueChange = {}
 
