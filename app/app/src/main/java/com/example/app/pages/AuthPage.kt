@@ -40,6 +40,15 @@ fun AuthPage(
     onSuccess: ()-> Unit = {},
     viewModel: AuthViewModel = viewModel()
 ) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            when (event) {
+                AuthEvent.NavigateToSuccess -> onSuccess()
+            }
+        }
+    }
     Column(
         modifier = Modifier
             .background(Color.White.copy(alpha = 0.4f),  shape = RoundedCornerShape(30.dp))
