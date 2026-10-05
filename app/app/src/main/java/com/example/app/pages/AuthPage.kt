@@ -111,21 +111,31 @@ fun AuthPage(
         Spacer(Modifier.height(8.dp))
 
         Button(
-            onClick = {  },
+            onClick = { viewModel.onSubmit(nav == "reg_page") },
+            enabled = state.isSubmitEnabled(nav == "reg_page"),
             modifier = Modifier.fillMaxWidth(0.7f)
         ) {
-            if (nav == "reg_page") Text("Зарегистрироваться") else Text("Войти")
+            if (state.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text(if (nav == "reg_page") "Зарегистрироваться" else "Войти")
+            }
         }
 
         Button(
-            onClick = { if (nav == "reg_page") onNavChange("login_page") else onNavChange("reg_page")},
+            onClick = {
+                onNavChange(if (nav == "reg_page") "login_page" else "reg_page")
+            },
             modifier = Modifier.fillMaxWidth(0.7f),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Green,
                 contentColor = Color.Black
             )
         ) {
-            if (nav == "reg_page") Text("Есть аккаунт?") else Text("Нет аккаунта?")
+            Text(if (nav == "reg_page") "Есть аккаунт?" else "Нет аккаунта?")
         }
     }
 }
