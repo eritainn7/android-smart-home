@@ -1,0 +1,23 @@
+{
+	"nodes":[
+		{"id":"5c543a0e80f5b41c","type":"text","text":"Mobile","x":-540,"y":-560,"width":110,"height":140,"color":"4"},
+		{"id":"f6e7cf20454a1d13","x":54,"y":-800,"width":140,"height":200,"color":"2","type":"text","text":"api-smart-home"},
+		{"id":"a1aeb07271e783c3","x":40,"y":-440,"width":168,"height":200,"color":"5","type":"text","text":"Postgres"},
+		{"id":"3f99ea60ae59377f","type":"text","text":"Auth","x":-700,"y":-180,"width":160,"height":200,"color":"2"},
+		{"id":"d2e20a8bec88aeb4","x":-920,"y":120,"width":100,"height":200,"color":"1","type":"text","text":"Redis"},
+		{"id":"2eb1059a987daf60","type":"text","text":"Postgres","x":-430,"y":120,"width":168,"height":200,"color":"5"},
+		{"id":"3b514bac888cf70f","x":520,"y":-730,"width":250,"height":60,"color":"6","type":"text","text":"Mosquito"},
+		{"id":"63fe99a7d9ffdc21","x":1040,"y":-730,"width":250,"height":60,"type":"text","text":"esp8266"}
+	],
+	"edges":[
+		{"id":"d2ad4677be9ea95b","fromNode":"5c543a0e80f5b41c","fromSide":"top","toNode":"f6e7cf20454a1d13","toSide":"top","color":"2","label":"http_request"},
+		{"id":"5d8f6cbc7bab82c4","fromNode":"f6e7cf20454a1d13","fromSide":"bottom","toNode":"5c543a0e80f5b41c","toSide":"bottom","color":"2","label":"http_response"},
+		{"id":"7798d29b9d4c458b","fromNode":"f6e7cf20454a1d13","fromSide":"bottom","toNode":"a1aeb07271e783c3","toSide":"top","fromEnd":"arrow","color":"4"},
+		{"id":"2aa3e2422b447fa9","fromNode":"3f99ea60ae59377f","fromSide":"left","toNode":"5c543a0e80f5b41c","toSide":"left","color":"2"},
+		{"id":"f83a0d2ce0658beb","fromNode":"5c543a0e80f5b41c","fromSide":"right","toNode":"3f99ea60ae59377f","toSide":"right","color":"2"},
+		{"id":"2887bed0d8bd5477","fromNode":"3f99ea60ae59377f","fromSide":"bottom","toNode":"d2e20a8bec88aeb4","toSide":"right","fromEnd":"arrow","color":"4"},
+		{"id":"ef051c516f86d098","fromNode":"2eb1059a987daf60","fromSide":"left","toNode":"3f99ea60ae59377f","toSide":"bottom","fromEnd":"arrow","color":"4"},
+		{"id":"eb4b043c645d1376","fromNode":"f6e7cf20454a1d13","fromSide":"right","toNode":"3b514bac888cf70f","toSide":"left","color":"6","label":"Subscribe"},
+		{"id":"68080cf18cb3db0a","fromNode":"63fe99a7d9ffdc21","fromSide":"left","toNode":"3b514bac888cf70f","toSide":"right","color":"6","label":"publish"}
+	]
+}
