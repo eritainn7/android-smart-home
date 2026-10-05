@@ -37,7 +37,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 fun AuthPage(
     nav: String,
     onNavChange: (String) -> Unit,
-    onSuccess: ()-> Unit = {}
+    onSuccess: ()-> Unit = {},
+    viewModel: AuthViewModel = viewModel()
 ) {
     Column(
         modifier = Modifier
