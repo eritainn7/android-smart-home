@@ -1,0 +1,110 @@
+services:
+  auth:
+    build:
+      context: ./auth
+      dockerfile: Dockerfile
+    environment:
+      SERVER_PORT: 8081
+      DATABASE_URL: jdbc:postgresql://auth-db:5432/auth
+      DATABASE_USER: smart_home
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-smart_home_dev}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env (at least 32 bytes)}
+      REQUIRE_EMAIL_CONFIRMATION: ${REQUIRE_EMAIL_CONFIRMATION:-true}
+      REGISTRATION_CODE_TTL_SECONDS: ${REGISTRATION_CODE_TTL_SECONDS:-600}
+      MAIL_FROM: ${MAIL_FROM:-no-reply@localhost}
+      MAIL_HOST: ${MAIL_HOST:-}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_SMTP_AUTH: ${MAIL_SMTP_AUTH:-true}
+      MAIL_SMTP_STARTTLS: ${MAIL_SMTP_STARTTLS:-true}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-*}
+    ports: ["8081:8081"]
+    depends_on:
+      auth-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  api-smart-home:
+    build:
+      context: ./api-smart-home
+      dockerfile: Dockerfile
+    environment:
+      SERVER_PORT: 8082
+      DATABASE_URL: jdbc:postgresql://home-db:5432/smart_home
+      DATABASE_USER: smart_home
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-smart_home_dev}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env (at least 32 bytes)}
+      MQTT_ENABLED: "true"
+      MQTT_URL: tcp://mosquitto:1883
+      MQTT_CLIENT_ID: api-smart-home
+      MQTT_USERNAME: ${MQTT_USERNAME:-}
+      MQTT_PASSWORD: ${MQTT_PASSWORD:-}
+      WEBSOCKET_ALLOWED_ORIGINS: ${WEBSOCKET_ALLOWED_ORIGINS:-*}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-*}
+    ports: ["8082:8082"]
+    depends_on:
+      home-db:
+        condition: service_healthy
+      mosquitto:
+        condition: service_started
+    restart: unless-stopped
+
+  auth-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: auth
+      POSTGRES_USER: smart_home
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-smart_home_dev}
+    ports: ["5433:5432"]
+    volumes: [auth-data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smart_home -d auth"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  home-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: smart_home
+      POSTGRES_USER: smart_home
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-smart_home_dev}
+    ports: ["5434:5432"]
+    volumes: [home-data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smart_home -d smart_home"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports: ["6379:6379"]
+    volumes: [redis-data:/data]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    ports: ["1883:1883"]
+    volumes:
+      - ./infrastructure/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - mosquitto-data:/mosquitto/data
+      - mosquitto-log:/mosquitto/log
+    restart: unless-stopped
+
+volumes:
+  auth-data:
+  home-data:
+  redis-data:
+  mosquitto-data:
+  mosquitto-log:
