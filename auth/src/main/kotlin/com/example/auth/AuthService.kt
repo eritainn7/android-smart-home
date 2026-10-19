@@ -2,13 +2,14 @@ package com.example.auth
 
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
+import jakarta.mail.internet.InternetAddress
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.http.HttpStatus
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
+import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.server.ResponseStatusException
@@ -56,16 +57,20 @@ class AuthService(
             redis.delete(attemptsKey)
             redis.opsForValue().set(key, "$id:${encoder.encode(password)}:$codeHash", codeTtlSeconds, TimeUnit.SECONDS)
             try {
-                val message = SimpleMailMessage().apply {
-                    setFrom(mailFrom)
-                    setTo(email)
-                    subject = "Код подтверждения регистрации"
-                    text = "Ваш код подтверждения: $code\n\nСрок действия кода — ${codeTtlSeconds / 60} минут. Если вы не запрашивали регистрацию, проигнорируйте это письмо."
+                val message = mailSender.createMimeMessage()
+                MimeMessageHelper(message, false, StandardCharsets.UTF_8.name()).apply {
+                    setFrom(InternetAddress(mailFrom.trim(), true))
+                    setTo(InternetAddress(email, true))
+                    setSubject("Код подтверждения регистрации")
+                    setText("Ваш код подтверждения: $code\n\nСрок действия кода — ${codeTtlSeconds / 60} минут. Если вы не запрашивали регистрацию, проигнорируйте это письмо.", false)
                 }
                 mailSender.send(message)
             } catch (ex: Exception) {
-                redis.delete(listOf(key, "registration-attempts:$email"))
-                throw ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Не удалось отправить письмо подтверждения")
+                redis.delete(listOf(key, attemptsKey))
+                // Log the actionable exception on the server; never include the confirmation code.
+                org.slf4j.LoggerFactory.getLogger(AuthService::class.java)
+                    .error("Registration email delivery failed for domain {}", email.substringAfterLast('@'), ex)
+                throw ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Не удалось отправить письмо подтверждения. Проверьте SMTP-настройки сервиса")
             }
             return RegistrationResult(email, "Код подтверждения отправлен на email")
         }
