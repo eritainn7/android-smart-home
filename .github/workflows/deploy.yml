@@ -24,6 +24,7 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_SSH_PORT || '22' }}
           passphrase: ${{ secrets.VPS_SSH_PASSPHRASE }}
+          command_timeout: 30m
           script: |
             set -eu
             APP_DIR=/opt/android-smart-home
